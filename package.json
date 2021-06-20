@@ -15,6 +15,7 @@
     "@types/jest": "^26.0.10",
     "@types/marked": "^2.0.3",
     "@types/node": "^15.12.3",
+    "@types/sanitize-html": "^2.3.1",
     "@types/uuid": "^8.3.0",
     "aws-cdk": "1.109.0",
     "jest": "^27.0.4",
@@ -37,6 +38,7 @@
     "@types/aws-lambda": "^8.10.77",
     "esbuild": "^0.12.9",
     "marked": "^2.1.1",
+    "sanitize-html": "^2.4.0",
     "source-map-support": "^0.5.16",
     "uuid": "^8.3.2"
   }

@@ -336,7 +336,7 @@ export default ({
 
                     ${generateSectionB("Delete the comment")}
                     ${generateSectionP(
-                      `<a href="${apiUrl}delete?id=${id}&access_token=${accessToken}">${apiUrl}delete?id=${id}</a>`
+                      `<a href="${apiUrl}delete?id=${id}&accessToken=${accessToken}">${apiUrl}delete?id=${id}</a>`
                     )}
 
                     ${generateSectionDivider}

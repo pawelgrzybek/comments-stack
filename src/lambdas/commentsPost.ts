@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import marked from "marked";
+import sanitizeHtml from "sanitize-html";
 import {
   DynamoDBClient,
   PutItemCommand,
@@ -64,7 +65,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
       website,
       twitter,
       github,
-      comment: marked(comment),
+      comment: sanitizeHtml(marked(comment)),
       parent,
       slug,
       title,

@@ -1,6 +1,6 @@
 import * as cdk from "@aws-cdk/core";
-import { NodejsFunction } from "@aws-cdk/aws-lambda-nodejs";
-import { RestApi, LambdaIntegration } from "@aws-cdk/aws-apigateway";
+import * as lambda from "@aws-cdk/aws-lambda-nodejs";
+import * as apigateway from "@aws-cdk/aws-apigateway";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3 from "@aws-cdk/aws-s3";
@@ -28,10 +28,10 @@ export class Stack extends cdk.Stack {
     });
 
     // S3
-    const bucket = new s3.Bucket(this, "MyFirstBucket");
+    const bucket = new s3.Bucket(this, "CommentsBucket");
 
     // API
-    const commentsApi = new RestApi(this, "CommentsApi", {
+    const commentsApi = new apigateway.RestApi(this, "CommentsApi", {
       defaultCorsPreflightOptions: {
         allowHeaders: ["Content-Type"],
         allowOrigins: props.allowOrigins,
@@ -44,29 +44,30 @@ export class Stack extends cdk.Stack {
     });
 
     // Lambdas
-    const commentsGet = new NodejsFunction(this, "CommentsGet", {
+    const commentsGet = new lambda.NodejsFunction(this, "CommentsGet", {
       entry: path.join(__dirname, "..", "src", "lambdas", "commentsGet.ts"),
       handler: "handler",
+      memorySize: 256,
       environment: {
         SECRETS: secrets.secretValue.toString(),
         TABLE_NAME: commentsTable.tableName,
         BUCKET_NAME: bucket.bucketName,
       },
     });
-
-    const commentsPost = new NodejsFunction(this, "CommentsPost", {
+    const commentsPost = new lambda.NodejsFunction(this, "CommentsPost", {
       entry: path.join(__dirname, "..", "src", "lambdas", "commentsPost.ts"),
       handler: "handler",
+      memorySize: 256,
       environment: {
         SECRETS: secrets.secretValue.toString(),
         TABLE_NAME: commentsTable.tableName,
-        API_URL: commentsApi.domainName?.toString() ?? "",
+        API_URL: "https://ek7pz40fr9.execute-api.eu-west-2.amazonaws.com/prod/",
       },
     });
-
-    const commentsDelete = new NodejsFunction(this, "CommentsDelete", {
+    const commentsDelete = new lambda.NodejsFunction(this, "CommentsDelete", {
       entry: path.join(__dirname, "..", "src", "lambdas", "commentsDelete.ts"),
       handler: "handler",
+      memorySize: 256,
       environment: {
         SECRETS: secrets.secretValue.toString(),
         TABLE_NAME: commentsTable.tableName,
@@ -78,13 +79,21 @@ export class Stack extends cdk.Stack {
 
     // Grant lambdas database access
     commentsTable.grantReadData(commentsGet);
-    commentsTable.grantWriteData(commentsPost);
+    commentsTable.grantReadWriteData(commentsPost);
     commentsTable.grantWriteData(commentsDelete);
 
     // Delegate API requests to Lambdas
-    commentsApi.root.addMethod("GET", new LambdaIntegration(commentsGet));
-    commentsApi.root.addMethod("POST", new LambdaIntegration(commentsPost));
-    commentsApi.root.addMethod("DELETE", new LambdaIntegration(commentsDelete));
+    commentsApi.root.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(commentsGet)
+    );
+    commentsApi.root.addMethod(
+      "POST",
+      new apigateway.LambdaIntegration(commentsPost)
+    );
+    commentsApi.root
+      .addResource("delete")
+      .addMethod("GET", new apigateway.LambdaIntegration(commentsDelete));
 
     // Authorize lambda to send email
     commentsPost.addToRolePolicy(

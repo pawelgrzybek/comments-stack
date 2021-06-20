@@ -1,19 +1,5 @@
 import obfuscateID from "./obfuscateId";
 
-interface IComment {
-  twitter: string;
-  website: string;
-  github: string;
-  slug: string;
-  createdAt: number;
-  comment: string;
-  parent: string;
-  id: string;
-  name: string;
-  title: string;
-  comments?: IComment[];
-}
-
 const commentsSort = (a: IComment, b: IComment) => a.createdAt - b.createdAt;
 const commentsMapNormalize = (i: IComment) => ({
   ...i,

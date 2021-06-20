@@ -9,33 +9,12 @@ import {
   generateResponse,
 } from "../utils";
 
-interface IComment {
-  twitter: string;
-  website: string;
-  github: string;
-  slug: string;
-  createdAt: number;
-  comment: string;
-  parent: string;
-  id: string;
-  name: string;
-  title: string;
-  comments?: IComment[];
-}
-
-interface ICommentsGroupedBySlug {
-  [key: string]: {
-    counter: number;
-    comments: IComment[];
-  };
-}
-
 const {
   AWS_REGION: region,
   SECRETS: secrets,
   TABLE_NAME: TableName,
   BUCKET_NAME: Bucket,
-} = process.env;
+} = process.env as { [key: string]: string };
 
 // clients init
 const dbClient = new DynamoDBClient({ region });

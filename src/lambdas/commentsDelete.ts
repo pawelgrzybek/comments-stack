@@ -6,7 +6,7 @@ const {
   AWS_REGION: region,
   TABLE_NAME: TableName,
   SECRETS: secrets,
-} = process.env;
+} = process.env as { [key: string]: string };
 
 // clients init
 const dbClient = new DynamoDBClient({ region });
