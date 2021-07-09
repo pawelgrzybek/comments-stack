@@ -9,7 +9,12 @@ import {
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { generateTemplate, obfuscateId, generateResponse } from "../utils";
+import {
+  generateTemplate,
+  obfuscateId,
+  generateResponse,
+  normalizeUsername,
+} from "../utils";
 
 const {
   AWS_REGION: region,
@@ -63,8 +68,8 @@ const handler: APIGatewayProxyHandler = async (event) => {
       id: uuidv4(),
       name,
       website,
-      twitter,
-      github,
+      twitter: normalizeUsername(twitter, "https://twitter.com"),
+      github: normalizeUsername(github, "https://github.com"),
       comment: sanitizeHtml(marked(comment)),
       parent,
       slug,

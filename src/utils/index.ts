@@ -4,6 +4,7 @@ import getCommentsLinked from "./getCommentsLinked";
 import getCommentsGroupedBySlug from "./getCommentsGroupedBySlug";
 import generateTemplate from "./generateTemplate";
 import generateResponse from "./generateResponse";
+import normalizeUsername from "./normalizeUsername";
 
 export {
   obfuscateId,
@@ -12,4 +13,5 @@ export {
   getCommentsGroupedBySlug,
   generateTemplate,
   generateResponse,
+  normalizeUsername,
 };
