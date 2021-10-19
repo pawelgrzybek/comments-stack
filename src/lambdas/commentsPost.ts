@@ -19,10 +19,11 @@ import { captureAWSv3Client } from "aws-xray-sdk-core";
 
 const {
   AWS_REGION: region,
-  SECRETS: secrets,
   TABLE_NAME: TableName,
-  API_URL: apiUrl,
-} = process.env as { [key: string]: string };
+  ACCESS_TOKEN: accessToken,
+  NETLIFY_BUILD_HOOK: netlifyBuildHook,
+  EMAIL_NOTIFICATIONS: emailNotifications,
+} = process.env as Record<string, string>;
 
 // clients init
 const dbClient = captureAWSv3Client(new DynamoDBClient({ region }));
@@ -90,12 +91,13 @@ const handler: APIGatewayProxyHandler = async (event) => {
     const obfuscatedId = obfuscateId(input.id);
     const obfuscatedParent = obfuscateId(input.parent);
 
-    const { accessToken, netlifyBuildHook, email } = JSON.parse(secrets);
+    const apiUrl = `https://${event.requestContext.domainPrefix}.execute-api.${region}.amazonaws.com/${event.requestContext.stage}/`;
+    console.log("apiUrl", apiUrl);
 
     const emailParams = {
-      Source: email,
+      Source: emailNotifications,
       Destination: {
-        ToAddresses: [email],
+        ToAddresses: [emailNotifications],
       },
       Message: {
         Body: {

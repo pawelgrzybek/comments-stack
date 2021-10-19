@@ -6,8 +6,8 @@ import { captureAWSv3Client } from "aws-xray-sdk-core";
 const {
   AWS_REGION: region,
   TABLE_NAME: TableName,
-  SECRETS: secrets,
-} = process.env as { [key: string]: string };
+  ACCESS_TOKEN: accessToken,
+} = process.env;
 
 // clients init
 const dbClient = captureAWSv3Client(new DynamoDBClient({ region }));
@@ -26,7 +26,6 @@ const handler: APIGatewayProxyHandler = async (event) => {
 
   try {
     const accessTokenQuery = event.queryStringParameters.accessToken;
-    const { accessToken } = JSON.parse(secrets!);
 
     console.log("Access token compare");
     if (accessTokenQuery !== accessToken) {

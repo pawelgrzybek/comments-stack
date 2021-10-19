@@ -2,11 +2,15 @@ import * as cdk from "@aws-cdk/core";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as apigateway from "@aws-cdk/aws-apigateway";
-import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as iam from "@aws-cdk/aws-iam";
 import * as path from "path";
+import * as sns from "@aws-cdk/aws-sns";
+import * as snsSubscriptions from "@aws-cdk/aws-sns-subscriptions";
+import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
+import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
+import * as ssm from "@aws-cdk/aws-ssm";
 
 interface StackProps extends cdk.StackProps {
   allowOrigins: string[];
@@ -16,11 +20,43 @@ export class Stack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
-    // Secret Manager
-    const secrets = secretsmanager.Secret.fromSecretNameV2(
+    const emailAlerts = ssm.StringParameter.fromStringParameterAttributes(
       this,
-      "CommentsSecrets",
-      "CommentsSecrets"
+      "CommentsEmailAlerts",
+      {
+        parameterName: "/CommentsStack/EmailAlerts",
+      }
+    ).stringValue;
+
+    const emailNotifications =
+      ssm.StringParameter.fromStringParameterAttributes(
+        this,
+        "CommentsEmailNotifications",
+        {
+          parameterName: "/CommentsStack/EmailNotifications",
+        }
+      ).stringValue;
+
+    const netlifyBuildHook = ssm.StringParameter.fromStringParameterAttributes(
+      this,
+      "CommentsNetlifyBuildHook",
+      {
+        parameterName: "/CommentsStack/NetlifyBuildHook",
+      }
+    ).stringValue;
+
+    const accessToken = ssm.StringParameter.fromStringParameterAttributes(
+      this,
+      "CommentsAccessToken",
+      {
+        parameterName: "/CommentsStack/AccessToken",
+      }
+    ).stringValue;
+
+    // SNS for lambda alerts
+    const topicCommentsStackAlerts = new sns.Topic(this, "CommentsStackAlerts");
+    topicCommentsStackAlerts.addSubscription(
+      new snsSubscriptions.EmailSubscription(emailAlerts)
     );
 
     // DynamoDB
@@ -51,7 +87,7 @@ export class Stack extends cdk.Stack {
       memorySize: 256,
       tracing: lambda.Tracing.ACTIVE,
       environment: {
-        SECRETS: secrets.secretValue.toString(),
+        ACCESS_TOKEN: accessToken,
         TABLE_NAME: commentsTable.tableName,
         BUCKET_NAME: bucket.bucketName,
       },
@@ -62,9 +98,10 @@ export class Stack extends cdk.Stack {
       memorySize: 256,
       tracing: lambda.Tracing.ACTIVE,
       environment: {
-        SECRETS: secrets.secretValue.toString(),
         TABLE_NAME: commentsTable.tableName,
-        API_URL: "https://ek7pz40fr9.execute-api.eu-west-2.amazonaws.com/prod/",
+        ACCESS_TOKEN: accessToken,
+        NETLIFY_BUILD_HOOK: netlifyBuildHook,
+        EMAIL_NOTIFICATIONS: emailNotifications,
       },
     });
     const commentsDelete = new lambdaNodejs.NodejsFunction(
@@ -82,10 +119,79 @@ export class Stack extends cdk.Stack {
         memorySize: 256,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
-          SECRETS: secrets.secretValue.toString(),
+          ACCESS_TOKEN: accessToken,
           TABLE_NAME: commentsTable.tableName,
         },
       }
+    );
+
+    // Alerts for Lambdas
+    const alarmCommentsGetLambda = new cloudwatch.Alarm(
+      this,
+      "CommentsGetLambdaAlarm",
+      {
+        metric: commentsGet.metricErrors({
+          period: cdk.Duration.hours(1),
+          statistic: "max",
+        }),
+        threshold: 0,
+        evaluationPeriods: 1,
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      }
+    );
+    const alarmCommentsPostLambda = new cloudwatch.Alarm(
+      this,
+      "CommentsPostLambdaAlarm",
+      {
+        metric: commentsPost.metricErrors({
+          period: cdk.Duration.hours(1),
+          statistic: "max",
+        }),
+        threshold: 0,
+        evaluationPeriods: 1,
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      }
+    );
+    const alarmCommentsDeleteLambda = new cloudwatch.Alarm(
+      this,
+      "CommentsDeleteLambdaAlarm",
+      {
+        metric: commentsDelete.metricErrors({
+          period: cdk.Duration.hours(1),
+          statistic: "max",
+        }),
+        threshold: 0,
+        evaluationPeriods: 1,
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      }
+    );
+
+    // Alert subscriptions - ALARM
+    alarmCommentsGetLambda.addAlarmAction(
+      new cloudwatchActions.SnsAction(topicCommentsStackAlerts)
+    );
+    alarmCommentsPostLambda.addAlarmAction(
+      new cloudwatchActions.SnsAction(topicCommentsStackAlerts)
+    );
+    alarmCommentsDeleteLambda.addAlarmAction(
+      new cloudwatchActions.SnsAction(topicCommentsStackAlerts)
+    );
+
+    // Alert subscriptions - OK
+    alarmCommentsGetLambda.addOkAction(
+      new cloudwatchActions.SnsAction(topicCommentsStackAlerts)
+    );
+    alarmCommentsPostLambda.addOkAction(
+      new cloudwatchActions.SnsAction(topicCommentsStackAlerts)
+    );
+    alarmCommentsDeleteLambda.addOkAction(
+      new cloudwatchActions.SnsAction(topicCommentsStackAlerts)
     );
 
     // Grant lambdas bucket access
