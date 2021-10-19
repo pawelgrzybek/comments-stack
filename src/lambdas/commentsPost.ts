@@ -15,6 +15,7 @@ import {
   generateResponse,
   normalizeUsername,
 } from "../utils";
+import { captureAWSv3Client } from "aws-xray-sdk-core";
 
 const {
   AWS_REGION: region,
@@ -24,8 +25,8 @@ const {
 } = process.env as { [key: string]: string };
 
 // clients init
-const dbClient = new DynamoDBClient({ region });
-const sesClient = new SESClient({ region });
+const dbClient = captureAWSv3Client(new DynamoDBClient({ region }));
+const sesClient = captureAWSv3Client(new SESClient({ region }));
 
 const handler: APIGatewayProxyHandler = async (event) => {
   console.log("Lambda invoked: comments-post", event);
@@ -127,9 +128,9 @@ const handler: APIGatewayProxyHandler = async (event) => {
       parent: obfuscatedParent,
     });
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
 
-    return generateResponse(400, { message: error.message });
+    return generateResponse(400, { message: "Uuuups!" });
   }
 };
 

@@ -8,6 +8,7 @@ import {
   getCommentsGroupedBySlug,
   generateResponse,
 } from "../utils";
+import { captureAWSv3Client, getSegment, Segment } from "aws-xray-sdk-core";
 
 const {
   AWS_REGION: region,
@@ -17,11 +18,12 @@ const {
 } = process.env as { [key: string]: string };
 
 // clients init
-const dbClient = new DynamoDBClient({ region });
-const s3Client = new S3Client({ region });
+const dbClient = captureAWSv3Client(new DynamoDBClient({ region }));
+const s3Client = captureAWSv3Client(new S3Client({ region }));
 
 const handler: APIGatewayProxyHandler = async (event) => {
   console.log("Lambda invoked: comments-get", event);
+  const segment = getSegment() as Segment;
 
   try {
     const accessTokenQuery = event?.queryStringParameters?.accessToken;
@@ -60,6 +62,8 @@ const handler: APIGatewayProxyHandler = async (event) => {
     );
     console.log("S3: object saved");
 
+    const subsegmentFormatting = segment.addNewSubsegment("format comments");
+
     const commentsGroupedBySlug = getCommentsGroupedBySlug(unmarshalledItems);
     const commentsSlugs = Object.keys(commentsGroupedBySlug);
 
@@ -72,12 +76,13 @@ const handler: APIGatewayProxyHandler = async (event) => {
       };
       return acc;
     }, {} as ICommentsGroupedBySlug);
+    subsegmentFormatting.close();
 
     return generateResponse(200, commentsFormatted);
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
 
-    return generateResponse(400, { message: error.message });
+    return generateResponse(400, { message: "Uuuups!" });
   }
 };
 

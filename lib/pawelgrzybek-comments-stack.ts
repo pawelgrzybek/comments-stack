@@ -1,5 +1,6 @@
 import * as cdk from "@aws-cdk/core";
-import * as lambda from "@aws-cdk/aws-lambda-nodejs";
+import * as lambda from "@aws-cdk/aws-lambda";
+import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as apigateway from "@aws-cdk/aws-apigateway";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
@@ -44,35 +45,48 @@ export class Stack extends cdk.Stack {
     });
 
     // Lambdas
-    const commentsGet = new lambda.NodejsFunction(this, "CommentsGet", {
+    const commentsGet = new lambdaNodejs.NodejsFunction(this, "CommentsGet", {
       entry: path.join(__dirname, "..", "src", "lambdas", "commentsGet.ts"),
       handler: "handler",
       memorySize: 256,
+      tracing: lambda.Tracing.ACTIVE,
       environment: {
         SECRETS: secrets.secretValue.toString(),
         TABLE_NAME: commentsTable.tableName,
         BUCKET_NAME: bucket.bucketName,
       },
     });
-    const commentsPost = new lambda.NodejsFunction(this, "CommentsPost", {
+    const commentsPost = new lambdaNodejs.NodejsFunction(this, "CommentsPost", {
       entry: path.join(__dirname, "..", "src", "lambdas", "commentsPost.ts"),
       handler: "handler",
       memorySize: 256,
+      tracing: lambda.Tracing.ACTIVE,
       environment: {
         SECRETS: secrets.secretValue.toString(),
         TABLE_NAME: commentsTable.tableName,
         API_URL: "https://ek7pz40fr9.execute-api.eu-west-2.amazonaws.com/prod/",
       },
     });
-    const commentsDelete = new lambda.NodejsFunction(this, "CommentsDelete", {
-      entry: path.join(__dirname, "..", "src", "lambdas", "commentsDelete.ts"),
-      handler: "handler",
-      memorySize: 256,
-      environment: {
-        SECRETS: secrets.secretValue.toString(),
-        TABLE_NAME: commentsTable.tableName,
-      },
-    });
+    const commentsDelete = new lambdaNodejs.NodejsFunction(
+      this,
+      "CommentsDelete",
+      {
+        entry: path.join(
+          __dirname,
+          "..",
+          "src",
+          "lambdas",
+          "commentsDelete.ts"
+        ),
+        handler: "handler",
+        memorySize: 256,
+        tracing: lambda.Tracing.ACTIVE,
+        environment: {
+          SECRETS: secrets.secretValue.toString(),
+          TABLE_NAME: commentsTable.tableName,
+        },
+      }
+    );
 
     // Grant lambdas bucket access
     bucket.grantPut(commentsGet);

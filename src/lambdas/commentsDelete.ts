@@ -1,6 +1,7 @@
 import { DynamoDBClient, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { generateResponse } from "../utils";
+import { captureAWSv3Client } from "aws-xray-sdk-core";
 
 const {
   AWS_REGION: region,
@@ -9,7 +10,7 @@ const {
 } = process.env as { [key: string]: string };
 
 // clients init
-const dbClient = new DynamoDBClient({ region });
+const dbClient = captureAWSv3Client(new DynamoDBClient({ region }));
 
 const handler: APIGatewayProxyHandler = async (event) => {
   console.log("Lambda invoked: comments-delete", event);
@@ -52,9 +53,9 @@ const handler: APIGatewayProxyHandler = async (event) => {
 
     return generateResponse(200, { message: "Comment deleted." });
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
 
-    return generateResponse(400, { message: error.message });
+    return generateResponse(400, { message: "Uuuups!" });
   }
 };
 
