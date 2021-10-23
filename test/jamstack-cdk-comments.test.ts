@@ -4,13 +4,11 @@ import {
   countResources,
 } from "@aws-cdk/assert";
 import * as cdk from "@aws-cdk/core";
-import * as Comments from "../lib/pawelgrzybek-comments-stack";
+import { CommentsStack } from "../lib/comments-stack";
 
 describe("JAMstack CDK comments Stack", () => {
   const app = new cdk.App();
-  const stack = new Comments.Stack(app, "MyTestStack", {
-    allowOrigins: ["https://pawelgrzybek.com"],
-  });
+  const stack = new CommentsStack(app, "MyTestStack");
 
   it("creates DynamoDB", () => {
     expectCDK(stack).to(haveResource("AWS::DynamoDB::Table"));
