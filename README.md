@@ -1,6 +1,11 @@
 # Comments Stack
 
+- [Architecture diagram](#architecture-diagram)
 - [Useful commands](#useful-commands)
+
+## Architecture diagram
+
+![Architecture diagram](readme.png)
 
 ## Useful commands
 
