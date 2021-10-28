@@ -38,7 +38,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
     console.log("Access token matches");
 
     console.log("DB: record delete");
-    await dbClient.send(
+    const deleteItemCommandOutput = await dbClient.send(
       new DeleteItemCommand({
         TableName,
         Key: {
@@ -46,11 +46,17 @@ const handler: APIGatewayProxyHandler = async (event) => {
             S: event.queryStringParameters.id,
           },
         },
+        ReturnValues: "ALL_OLD",
       })
     );
+    console.log(`Output: ${JSON.stringify(deleteItemCommandOutput, null, 2)}`);
     console.log("DB: record deleted");
 
-    return generateResponse(200, { message: "Comment deleted." });
+    return generateResponse(200, {
+      message: deleteItemCommandOutput?.Attributes
+        ? `Comment ${deleteItemCommandOutput.Attributes.id.S} sucessfully deleted.`
+        : `Comment not found.`,
+    });
   } catch (error) {
     console.error(error);
 
