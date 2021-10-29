@@ -81,7 +81,9 @@ const handler: APIGatewayProxyHandler = async (event) => {
   } catch (error) {
     console.error(error);
 
-    return generateResponse(400, { message: "Uuuups!" });
+    return generateResponse(400, {
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 };
 
