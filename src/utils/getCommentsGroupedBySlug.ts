@@ -1,4 +1,4 @@
-export default (comments: IComment[]): ICommentsGroupedBySlug =>
+export default (comments: Comment[]): CommentsGroupedBySlug =>
   comments.reduce((acc, current) => {
     const { slug } = current;
     if (acc[slug]) {
@@ -14,4 +14,4 @@ export default (comments: IComment[]): ICommentsGroupedBySlug =>
         comments: [current],
       },
     };
-  }, {} as ICommentsGroupedBySlug);
+  }, {} as CommentsGroupedBySlug);

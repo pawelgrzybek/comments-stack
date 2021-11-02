@@ -1,4 +1,4 @@
-interface IResponse {
+interface Response {
   statusCode: number;
   headers: {
     [key: string]: string;
@@ -9,7 +9,7 @@ interface IResponse {
 export default (
   statusCode: number,
   data: Record<string, unknown>
-): IResponse => ({
+): Response => ({
   statusCode,
   headers: {
     "Access-Control-Allow-Origin": "*",

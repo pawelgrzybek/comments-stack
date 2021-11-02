@@ -26,8 +26,10 @@ const {
 } = process.env as Record<string, string>;
 
 // clients init
-const dbClient = captureAWSv3Client(new DynamoDBClient({ region }));
-const sesClient = captureAWSv3Client(new SESClient({ region }));
+// as any as a temporarly workaround for
+// https://github.com/aws/aws-xray-sdk-node/issues/439
+const dbClient = captureAWSv3Client(new DynamoDBClient({ region }) as any);
+const sesClient = captureAWSv3Client(new SESClient({ region }) as any);
 
 const handler: APIGatewayProxyHandler = async (event) => {
   console.log("Lambda invoked: comments-post", event);

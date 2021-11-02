@@ -1,15 +1,15 @@
 import obfuscateID from "./obfuscateId";
 
-const commentsSort = (a: IComment, b: IComment) => a.createdAt - b.createdAt;
-const commentsMapNormalize = (i: IComment) => ({
+const commentsSort = (a: Comment, b: Comment) => a.createdAt - b.createdAt;
+const commentsMapNormalize = (i: Comment) => ({
   ...i,
   id: obfuscateID(i.id),
   parent: obfuscateID(i.parent),
 });
-const commentsFilterTopLevel = (i: IComment) => i.parent === "";
-const commentsFilterChildren = (i: IComment) => i.parent !== "";
+const commentsFilterTopLevel = (i: Comment) => i.parent === "";
+const commentsFilterChildren = (i: Comment) => i.parent !== "";
 
-export default (comments: IComment[]): IComment[] => {
+export default (comments: Comment[]): Comment[] => {
   const commentsSorted = comments.sort(commentsSort).map(commentsMapNormalize);
 
   const commentsTopLevel = commentsSorted.filter(commentsFilterTopLevel);
@@ -19,7 +19,7 @@ export default (comments: IComment[]): IComment[] => {
     return commentsTopLevel;
   }
 
-  const levels: IComment[][] = [commentsTopLevel];
+  const levels: Comment[][] = [commentsTopLevel];
 
   while (levels.flat().length < comments.length) {
     const levelPrev = levels[levels.length - 1];

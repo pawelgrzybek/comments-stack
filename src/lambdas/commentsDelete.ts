@@ -10,7 +10,9 @@ const {
 } = process.env;
 
 // clients init
-const dbClient = captureAWSv3Client(new DynamoDBClient({ region }));
+// as any as a temporarly workaround for
+// https://github.com/aws/aws-xray-sdk-node/issues/439
+const dbClient = captureAWSv3Client(new DynamoDBClient({ region }) as any);
 
 const handler: APIGatewayProxyHandler = async (event) => {
   console.log("Lambda invoked: comments-delete", event);

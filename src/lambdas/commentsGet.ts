@@ -18,8 +18,10 @@ const {
 } = process.env;
 
 // clients init
-const dbClient = captureAWSv3Client(new DynamoDBClient({ region }));
-const s3Client = captureAWSv3Client(new S3Client({ region }));
+// as any as a temporarly workaround for
+// https://github.com/aws/aws-xray-sdk-node/issues/439
+const dbClient = captureAWSv3Client(new DynamoDBClient({ region }) as any);
+const s3Client = captureAWSv3Client(new S3Client({ region }) as any);
 
 const handler: APIGatewayProxyHandler = async (event) => {
   console.log("Lambda invoked: comments-get", event);
@@ -46,7 +48,11 @@ const handler: APIGatewayProxyHandler = async (event) => {
     );
     console.log("DB: items received");
 
-    const unmarshalledItems = Items?.map((i) => unmarshall(i)) as IComment[];
+    // as any as a temporarly workaround for
+    // https://github.com/aws/aws-xray-sdk-node/issues/439
+    const unmarshalledItems = (Items as any[])?.map((i) =>
+      unmarshall(i)
+    ) as Comment[];
 
     const { year, month, date, hours, minutes, seconds } = getCurrentDate();
     const Key = `${year}.${month}.${date}, ${hours}:${minutes}:${seconds}, ${Count}.json`;
@@ -74,7 +80,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
         comments: getCommentsLinked(comments),
       };
       return acc;
-    }, {} as ICommentsGroupedBySlug);
+    }, {} as CommentsGroupedBySlug);
     subsegmentFormatting.close();
 
     return generateResponse(200, commentsFormatted);
