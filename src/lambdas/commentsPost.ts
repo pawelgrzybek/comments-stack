@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
-import marked from "marked";
+// @ts-ignore
+import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 import {
   DynamoDBClient,
