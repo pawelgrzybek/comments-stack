@@ -102,6 +102,7 @@ export class CommentsStack extends cdk.Stack {
       deployOptions: {
         throttlingRateLimit: 1,
         throttlingBurstLimit: 1,
+        dataTraceEnabled: true,
       },
     });
 
