@@ -9,9 +9,6 @@ const {
   ACCESS_TOKEN: accessToken,
 } = process.env;
 
-// clients init
-// as any as a temporarly workaround for
-// https://github.com/aws/aws-xray-sdk-node/issues/439
 const dbClient = captureAWSv3Client(new DynamoDBClient({ region }) as any);
 
 const handler: APIGatewayProxyHandler = async (event) => {

@@ -17,9 +17,6 @@ const {
   ACCESS_TOKEN: accessToken,
 } = process.env;
 
-// clients init
-// as any as a temporarly workaround for
-// https://github.com/aws/aws-xray-sdk-node/issues/439
 const dbClient = captureAWSv3Client(new DynamoDBClient({ region }) as any);
 const s3Client = captureAWSv3Client(new S3Client({ region }) as any);
 

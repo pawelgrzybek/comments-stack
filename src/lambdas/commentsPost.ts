@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-// @ts-ignore
 import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 import {
@@ -26,9 +25,6 @@ const {
   EMAIL_NOTIFICATIONS: emailNotifications,
 } = process.env as Record<string, string>;
 
-// clients init
-// as any as a temporarly workaround for
-// https://github.com/aws/aws-xray-sdk-node/issues/439
 const dbClient = captureAWSv3Client(new DynamoDBClient({ region }) as any);
 const sesClient = captureAWSv3Client(new SESClient({ region }) as any);
 
