@@ -175,7 +175,6 @@ interface ITemplateInfo {
   parent: string;
   apiUrl: string;
   accessToken: string;
-  netlifyBuildHook: string;
 }
 
 export default ({
@@ -191,7 +190,6 @@ export default ({
   parent,
   apiUrl,
   accessToken,
-  netlifyBuildHook,
 }: ITemplateInfo): string => `<!DOCTYPE html>
 <html
   xmlns="http://www.w3.org/1999/xhtml"
@@ -331,7 +329,7 @@ export default ({
 
                     ${generateSectionB("Accept and re-deploy the website")}
                     ${generateSectionP(
-                      `<a href="https://app.netlify.com/sites/pawelgrzybek/deploys" ping="${netlifyBuildHook}">https://app.netlify.com/sites/pawelgrzybek/deploys</a>`
+                      `<a href="${apiUrl}publish?id=${id}&accessToken=${accessToken}">${apiUrl}publish</a>`
                     )}
 
                     ${generateSectionB("Delete the comment")}

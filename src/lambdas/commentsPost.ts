@@ -21,7 +21,6 @@ const {
   AWS_REGION: region,
   TABLE_NAME: TableName,
   ACCESS_TOKEN: accessToken,
-  NETLIFY_BUILD_HOOK: netlifyBuildHook,
   EMAIL_NOTIFICATIONS: emailNotifications,
 } = process.env as Record<string, string>;
 
@@ -108,7 +107,6 @@ const handler: APIGatewayProxyHandler = async (event) => {
               comment,
               apiUrl,
               accessToken,
-              netlifyBuildHook,
             }),
           },
         },

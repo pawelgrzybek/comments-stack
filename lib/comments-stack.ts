@@ -29,9 +29,11 @@ const RESOURCE_ID = {
   LAMBDA_COMMENTS_GET: "LambdaCommentsGet",
   LAMBDA_COMMENTS_POST: "LambdaCommentsPost",
   LAMBDA_COMMENTS_DELETE: "LambdaCommentsDelete",
+  LAMBDA_COMMENTS_PUBLISH: "LambdaCommentsPublish",
   LAMBDA_COMMENTS_GET_ALARM: "LambdaCommentsGetAlarm",
   LAMBDA_COMMENTS_POST_ALARM: "LambdaCommentsPostAlarm",
   LAMBDA_COMMENTS_DELETE_ALARM: "LambdaCommentsDeleteAlarm",
+  LAMBDA_COMMENTS_PUBLISH_ALARM: "LambdaCommentsPublishAlarm",
 };
 
 export class CommentsStack extends Stack {
@@ -140,7 +142,6 @@ export class CommentsStack extends Stack {
         environment: {
           TABLE_NAME: dynamoDbTableComments.tableName,
           ACCESS_TOKEN: ssmParameterAccessToken,
-          NETLIFY_BUILD_HOOK: ssmParameterNetlifyBuildHook,
           EMAIL_NOTIFICATIONS: ssmParameterEmailNotifications,
         },
       }
@@ -164,6 +165,28 @@ export class CommentsStack extends Stack {
         environment: {
           ACCESS_TOKEN: ssmParameterAccessToken,
           TABLE_NAME: dynamoDbTableComments.tableName,
+        },
+      }
+    );
+
+    const lambdaCommentsPublish = new lambdaNodejs.NodejsFunction(
+      this,
+      RESOURCE_ID.LAMBDA_COMMENTS_PUBLISH,
+      {
+        functionName: `${id}-${RESOURCE_ID.LAMBDA_COMMENTS_PUBLISH}`,
+        entry: path.join(
+          __dirname,
+          "..",
+          "src",
+          "lambdas",
+          "commentsPublish.ts"
+        ),
+        memorySize: 256,
+        architecture: lambda.Architecture.ARM_64,
+        tracing: lambda.Tracing.ACTIVE,
+        environment: {
+          ACCESS_TOKEN: ssmParameterAccessToken,
+          NETLIFY_BUILD_HOOK: ssmParameterNetlifyBuildHook,
         },
       }
     );
@@ -219,10 +242,28 @@ export class CommentsStack extends Stack {
       }
     );
 
+    const lambdaCommentsPublishAlarm = new cloudwatch.Alarm(
+      this,
+      RESOURCE_ID.LAMBDA_COMMENTS_PUBLISH_ALARM,
+      {
+        alarmName: `${id}-Errors-${RESOURCE_ID.LAMBDA_COMMENTS_PUBLISH_ALARM}`,
+        metric: lambdaCommentsPublish.metricErrors({
+          period: Duration.hours(1),
+          statistic: "max",
+        }),
+        threshold: 0,
+        evaluationPeriods: 1,
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      }
+    );
+
     [
       lambdaCommentsGetAlarm,
       lambdaCommentsPostAlarm,
       lambdaCommentsDeleteAlarm,
+      lambdaCommentsPublishAlarm,
     ].forEach((alarm) => {
       alarm.addAlarmAction(new cloudwatchActions.SnsAction(snsTopicAlerts));
       alarm.addInsufficientDataAction(
@@ -248,6 +289,12 @@ export class CommentsStack extends Stack {
     api.root
       .addResource("delete")
       .addMethod("GET", new apigateway.LambdaIntegration(lambdaCommentsDelete));
+    api.root
+      .addResource("publish")
+      .addMethod(
+        "GET",
+        new apigateway.LambdaIntegration(lambdaCommentsPublish)
+      );
 
     lambdaCommentsPost.addToRolePolicy(
       new iam.PolicyStatement({
