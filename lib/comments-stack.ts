@@ -1,16 +1,21 @@
-import * as cdk from "@aws-cdk/core";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
-import * as apigateway from "@aws-cdk/aws-apigateway";
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as iam from "@aws-cdk/aws-iam";
 import * as path from "path";
-import * as sns from "@aws-cdk/aws-sns";
-import * as snsSubscriptions from "@aws-cdk/aws-sns-subscriptions";
-import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
-import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
-import * as ssm from "@aws-cdk/aws-ssm";
+import { Construct } from "constructs";
+import {
+  Stack,
+  StackProps,
+  Duration,
+  aws_ssm as ssm,
+  aws_sns as sns,
+  aws_sns_subscriptions as snsSubscriptions,
+  aws_dynamodb as dynamodb,
+  aws_apigateway as apigateway,
+  aws_lambda as lambda,
+  aws_lambda_nodejs as lambdaNodejs,
+  aws_s3 as s3,
+  aws_cloudwatch as cloudwatch,
+  aws_iam as iam,
+  aws_cloudwatch_actions as cloudwatchActions,
+} from "aws-cdk-lib";
 
 const RESOURCE_ID = {
   SSM_PARAMETER_EMAIL_ALERTS: "SsmParameterEmailAlerts",
@@ -29,8 +34,8 @@ const RESOURCE_ID = {
   LAMBDA_COMMENTS_DELETE_ALARM: "LambdaCommentsDeleteAlarm",
 };
 
-export class CommentsStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+export class CommentsStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
     const ssmParameterEmailAlerts =
@@ -169,7 +174,7 @@ export class CommentsStack extends cdk.Stack {
       {
         alarmName: `${id}-Errors-${RESOURCE_ID.LAMBDA_COMMENTS_GET_ALARM}`,
         metric: lambdaCommentsGet.metricErrors({
-          period: cdk.Duration.hours(1),
+          period: Duration.hours(1),
           statistic: "max",
         }),
         threshold: 0,
@@ -186,7 +191,7 @@ export class CommentsStack extends cdk.Stack {
       {
         alarmName: `${id}-Errors-${RESOURCE_ID.LAMBDA_COMMENTS_POST_ALARM}`,
         metric: lambdaCommentsPost.metricErrors({
-          period: cdk.Duration.hours(1),
+          period: Duration.hours(1),
           statistic: "max",
         }),
         threshold: 0,
@@ -203,7 +208,7 @@ export class CommentsStack extends cdk.Stack {
       {
         alarmName: `${id}-Errors-${RESOURCE_ID.LAMBDA_COMMENTS_DELETE_ALARM}`,
         metric: lambdaCommentsDelete.metricErrors({
-          period: cdk.Duration.hours(1),
+          period: Duration.hours(1),
           statistic: "max",
         }),
         threshold: 0,
