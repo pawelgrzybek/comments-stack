@@ -127,6 +127,9 @@ export class CommentsStack extends Stack {
           TABLE_NAME: dynamoDbTableComments.tableName,
           BUCKET_NAME: s3Bucket.bucketName,
         },
+        // bundling: {
+        //   format: lambdaNodejs.OutputFormat.ESM,
+        // },
       }
     );
 

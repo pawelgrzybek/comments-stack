@@ -3,12 +3,12 @@ import {
   haveResource,
   countResources,
 } from "@aws-cdk/assert";
-import * as cdk from "@aws-cdk/core";
+import { App } from "aws-cdk-lib";
 import { CommentsStack } from "../lib/comments-stack";
 
-describe("JAMstack CDK comments Stack", () => {
-  const app = new cdk.App();
-  const stack = new CommentsStack(app, "MyTestStack");
+describe("Comments Stack", () => {
+  const app = new App();
+  const stack = new CommentsStack(app, "TestCommentsStack");
 
   it("creates DynamoDB", () => {
     expectCDK(stack).to(haveResource("AWS::DynamoDB::Table"));
@@ -23,7 +23,7 @@ describe("JAMstack CDK comments Stack", () => {
   });
 
   it("creates Lambdas", () => {
-    expectCDK(stack).to(countResources("AWS::Lambda::Function", 3));
+    expectCDK(stack).to(countResources("AWS::Lambda::Function", 4));
     expectCDK(stack).to(
       haveResource("AWS::Lambda::Function", {
         Handler: "index.handler",
