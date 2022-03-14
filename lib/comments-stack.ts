@@ -119,7 +119,7 @@ export class CommentsStack extends Stack {
       {
         functionName: `${id}-${RESOURCE_ID.LAMBDA_COMMENTS_GET}`,
         entry: path.join(__dirname, "..", "src", "lambdas", "commentsGet.ts"),
-        memorySize: 256,
+        memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
@@ -139,7 +139,7 @@ export class CommentsStack extends Stack {
       {
         functionName: `${id}-${RESOURCE_ID.LAMBDA_COMMENTS_POST}`,
         entry: path.join(__dirname, "..", "src", "lambdas", "commentsPost.ts"),
-        memorySize: 256,
+        memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
@@ -162,7 +162,7 @@ export class CommentsStack extends Stack {
           "lambdas",
           "commentsDelete.ts"
         ),
-        memorySize: 256,
+        memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
@@ -184,7 +184,7 @@ export class CommentsStack extends Stack {
           "lambdas",
           "commentsPublish.ts"
         ),
-        memorySize: 256,
+        memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
