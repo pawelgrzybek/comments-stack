@@ -1,6 +1,5 @@
 interface Comment {
   id: string;
-  twitter: string;
   website: string;
   github: string;
   slug: string;

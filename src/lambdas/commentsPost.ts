@@ -37,8 +37,9 @@ const handler: APIGatewayProxyHandler = async (event) => {
   }
 
   try {
-    const { name, website, twitter, github, comment, parent, slug, title } =
-      JSON.parse(event.body);
+    const { name, website, github, comment, parent, slug, title } = JSON.parse(
+      event.body
+    );
 
     if (parent !== "") {
       console.log(`Child comment reqest received for commend ID: ${parent}`);
@@ -68,7 +69,6 @@ const handler: APIGatewayProxyHandler = async (event) => {
       id: uuidv4(),
       name,
       website,
-      twitter: normalizeUsername(twitter, "https://twitter.com"),
       github: normalizeUsername(github, "https://github.com"),
       comment: sanitizeHtml(marked(comment)),
       parent,

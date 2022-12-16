@@ -16,8 +16,6 @@
         <mj-text mj-class="p" >Pawel Grzybek</mj-text>
         <mj-text mj-class="b" >Website:</mj-text>
         <mj-text mj-class="p" ><a href="http://pawelgrzybek.com">http://pawelgrzybek.com</a></mj-text>
-        <mj-text mj-class="b" >Twitter:</mj-text>
-        <mj-text mj-class="p" ><a href="https://twitter.com/pawelgrzybek">https://twitter.com/pawelgrzybek</a></mj-text>
         <mj-text mj-class="b" >GitHub:</mj-text>
         <mj-text mj-class="p" ><a href="https://github.com/pawelgrzybek">https://github.com/pawelgrzybek</a></mj-text>
         <mj-text mj-class="b" >Comment:</mj-text>
@@ -142,16 +140,6 @@ ${generateSectionB("Website")}
 ${generateSectionP(`<a href="${website}">${website}</a>`)}
 `;
 
-const generateSectionTwitter = (twitter: string): string =>
-  twitter === ""
-    ? ""
-    : `
-${generateSectionB("Twitter")}
-${generateSectionP(
-  `<a href="https://twitter.com/${twitter}">https://twitter.com/${twitter}</a>`
-)}
-`;
-
 const generateSectionGitHub = (github: string): string =>
   github === ""
     ? ""
@@ -167,7 +155,6 @@ interface ITemplateInfo {
   obfuscatedId: string;
   name: string;
   website: string;
-  twitter: string;
   github: string;
   comment: string;
   slug: string;
@@ -182,7 +169,6 @@ export default ({
   obfuscatedId,
   name,
   website,
-  twitter,
   github,
   comment,
   slug,
@@ -317,8 +303,6 @@ export default ({
                     ${generateSectionP(name)}
 
                     ${generateSectionWebsite(website)}
-
-                    ${generateSectionTwitter(twitter)}
 
                     ${generateSectionGitHub(github)}
 
