@@ -121,16 +121,12 @@ export class CommentsStack extends Stack {
         entry: path.join(__dirname, "..", "src", "lambdas", "commentsGet.ts"),
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
-        runtime: lambda.Runtime.NODEJS_18_X,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
           ACCESS_TOKEN: ssmParameterAccessToken,
           TABLE_NAME: dynamoDbTableComments.tableName,
           BUCKET_NAME: s3Bucket.bucketName,
         },
-        // bundling: {
-        //   format: lambdaNodejs.OutputFormat.ESM,
-        // },
       }
     );
 
@@ -142,7 +138,6 @@ export class CommentsStack extends Stack {
         entry: path.join(__dirname, "..", "src", "lambdas", "commentsPost.ts"),
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
-        runtime: lambda.Runtime.NODEJS_18_X,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
           TABLE_NAME: dynamoDbTableComments.tableName,
@@ -166,7 +161,6 @@ export class CommentsStack extends Stack {
         ),
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
-        runtime: lambda.Runtime.NODEJS_18_X,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
           ACCESS_TOKEN: ssmParameterAccessToken,
@@ -189,7 +183,6 @@ export class CommentsStack extends Stack {
         ),
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
-        runtime: lambda.Runtime.NODEJS_18_X,
         tracing: lambda.Tracing.ACTIVE,
         environment: {
           ACCESS_TOKEN: ssmParameterAccessToken,
