@@ -15,6 +15,7 @@ import {
   aws_cloudwatch as cloudwatch,
   aws_iam as iam,
   aws_cloudwatch_actions as cloudwatchActions,
+  aws_lambda,
 } from "aws-cdk-lib";
 
 const RESOURCE_ID = {
@@ -122,6 +123,7 @@ export class CommentsStack extends Stack {
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
         tracing: lambda.Tracing.ACTIVE,
+        runtime: aws_lambda.Runtime.NODEJS_20_X,
         environment: {
           ACCESS_TOKEN: ssmParameterAccessToken,
           TABLE_NAME: dynamoDbTableComments.tableName,
@@ -139,6 +141,7 @@ export class CommentsStack extends Stack {
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
         tracing: lambda.Tracing.ACTIVE,
+        runtime: aws_lambda.Runtime.NODEJS_20_X,
         environment: {
           TABLE_NAME: dynamoDbTableComments.tableName,
           ACCESS_TOKEN: ssmParameterAccessToken,
@@ -162,6 +165,7 @@ export class CommentsStack extends Stack {
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
         tracing: lambda.Tracing.ACTIVE,
+        runtime: aws_lambda.Runtime.NODEJS_20_X,
         environment: {
           ACCESS_TOKEN: ssmParameterAccessToken,
           TABLE_NAME: dynamoDbTableComments.tableName,
@@ -184,6 +188,7 @@ export class CommentsStack extends Stack {
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
         tracing: lambda.Tracing.ACTIVE,
+        runtime: aws_lambda.Runtime.NODEJS_20_X,
         environment: {
           ACCESS_TOKEN: ssmParameterAccessToken,
           NETLIFY_BUILD_HOOK: ssmParameterNetlifyBuildHook,

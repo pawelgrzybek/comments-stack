@@ -1,5 +1,4 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import fetch from "node-fetch";
 import { generateResponse } from "../utils";
 
 const { ACCESS_TOKEN: accessToken, NETLIFY_BUILD_HOOK: netlifyBuildHook } =
