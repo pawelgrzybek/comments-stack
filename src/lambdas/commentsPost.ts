@@ -27,6 +27,8 @@ const {
 const dbClient = captureAWSv3Client(new DynamoDBClient({ region }) as any);
 const sesClient = captureAWSv3Client(new SESClient({ region }) as any);
 
+const BLOCKED_NAMES = ["course", "bangalore", "chennai"];
+
 const handler: APIGatewayProxyHandler = async (event) => {
   console.log("Lambda invoked: comments-post", event);
 
@@ -38,8 +40,16 @@ const handler: APIGatewayProxyHandler = async (event) => {
 
   try {
     const { name, website, github, comment, parent, slug, title } = JSON.parse(
-      event.body
+      event.body,
     );
+
+    if (
+      BLOCKED_NAMES.some((blocked_name) =>
+        (name as string).toLowerCase().includes(blocked_name),
+      )
+    ) {
+      return generateResponse(200, {});
+    }
 
     if (parent !== "") {
       console.log(`Child comment reqest received for commend ID: ${parent}`);
@@ -55,7 +65,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
           ExpressionAttributeValues: {
             ":parentid": { S: parent },
           },
-        })
+        }),
       );
       console.log("DB: items received");
 
@@ -82,7 +92,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
       new PutItemCommand({
         TableName,
         Item: marshall(input),
-      })
+      }),
     );
     console.log("DB: items saved");
 
