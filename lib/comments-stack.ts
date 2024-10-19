@@ -47,7 +47,7 @@ export class CommentsStack extends Stack {
         RESOURCE_ID.SSM_PARAMETER_EMAIL_ALERTS,
         {
           parameterName: `/${id}/EmailAlerts`,
-        }
+        },
       ).stringValue;
 
     const ssmParameterEmailNotifications =
@@ -56,7 +56,7 @@ export class CommentsStack extends Stack {
         RESOURCE_ID.SSM_PARAMETER_EMAIL_NOTIFICATIONS,
         {
           parameterName: `/${id}/EmailNotifications`,
-        }
+        },
       ).stringValue;
 
     const ssmParameterNetlifyBuildHook =
@@ -65,7 +65,7 @@ export class CommentsStack extends Stack {
         RESOURCE_ID.SSM_PARAMETER_NETLIFY_BUILD_HOOK,
         {
           parameterName: `/${id}/NetlifyBuildHook`,
-        }
+        },
       ).stringValue;
 
     const ssmParameterAccessToken =
@@ -74,14 +74,14 @@ export class CommentsStack extends Stack {
         RESOURCE_ID.SSM_PARAMETER_ACCESS_TOKEN,
         {
           parameterName: `/${id}/AccessToken`,
-        }
+        },
       ).stringValue;
 
     const snsTopicAlerts = new sns.Topic(this, RESOURCE_ID.SNS_TOPIC_ALERTS, {
       topicName: `${id}-${RESOURCE_ID.SNS_TOPIC_ALERTS}`,
     });
     snsTopicAlerts.addSubscription(
-      new snsSubscriptions.EmailSubscription(ssmParameterEmailAlerts)
+      new snsSubscriptions.EmailSubscription(ssmParameterEmailAlerts),
     );
 
     const dynamoDbTableComments = new dynamodb.Table(
@@ -93,7 +93,7 @@ export class CommentsStack extends Stack {
           name: "id",
           type: dynamodb.AttributeType.STRING,
         },
-      }
+      },
     );
 
     const s3Bucket = new s3.Bucket(this, RESOURCE_ID.S3_BUCKET, {
@@ -129,7 +129,12 @@ export class CommentsStack extends Stack {
           TABLE_NAME: dynamoDbTableComments.tableName,
           BUCKET_NAME: s3Bucket.bucketName,
         },
-      }
+        bundling: {
+          esbuildArgs: {
+            "--packages": "bundle",
+          },
+        },
+      },
     );
 
     const lambdaCommentsPost = new lambdaNodejs.NodejsFunction(
@@ -147,7 +152,12 @@ export class CommentsStack extends Stack {
           ACCESS_TOKEN: ssmParameterAccessToken,
           EMAIL_NOTIFICATIONS: ssmParameterEmailNotifications,
         },
-      }
+        bundling: {
+          esbuildArgs: {
+            "--packages": "bundle",
+          },
+        },
+      },
     );
 
     const lambdaCommentsDelete = new lambdaNodejs.NodejsFunction(
@@ -160,7 +170,7 @@ export class CommentsStack extends Stack {
           "..",
           "src",
           "lambdas",
-          "commentsDelete.ts"
+          "commentsDelete.ts",
         ),
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
@@ -170,7 +180,12 @@ export class CommentsStack extends Stack {
           ACCESS_TOKEN: ssmParameterAccessToken,
           TABLE_NAME: dynamoDbTableComments.tableName,
         },
-      }
+        bundling: {
+          esbuildArgs: {
+            "--packages": "bundle",
+          },
+        },
+      },
     );
 
     const lambdaCommentsPublish = new lambdaNodejs.NodejsFunction(
@@ -183,7 +198,7 @@ export class CommentsStack extends Stack {
           "..",
           "src",
           "lambdas",
-          "commentsPublish.ts"
+          "commentsPublish.ts",
         ),
         memorySize: 512,
         architecture: lambda.Architecture.ARM_64,
@@ -193,7 +208,7 @@ export class CommentsStack extends Stack {
           ACCESS_TOKEN: ssmParameterAccessToken,
           NETLIFY_BUILD_HOOK: ssmParameterNetlifyBuildHook,
         },
-      }
+      },
     );
 
     const lambdaCommentsGetAlarm = new cloudwatch.Alarm(
@@ -210,7 +225,7 @@ export class CommentsStack extends Stack {
         comparisonOperator:
           cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
         treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-      }
+      },
     );
 
     const lambdaCommentsPostAlarm = new cloudwatch.Alarm(
@@ -227,7 +242,7 @@ export class CommentsStack extends Stack {
         comparisonOperator:
           cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
         treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-      }
+      },
     );
 
     const lambdaCommentsDeleteAlarm = new cloudwatch.Alarm(
@@ -244,7 +259,7 @@ export class CommentsStack extends Stack {
         comparisonOperator:
           cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
         treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-      }
+      },
     );
 
     const lambdaCommentsPublishAlarm = new cloudwatch.Alarm(
@@ -261,7 +276,7 @@ export class CommentsStack extends Stack {
         comparisonOperator:
           cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
         treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-      }
+      },
     );
 
     [
@@ -272,7 +287,7 @@ export class CommentsStack extends Stack {
     ].forEach((alarm) => {
       alarm.addAlarmAction(new cloudwatchActions.SnsAction(snsTopicAlerts));
       alarm.addInsufficientDataAction(
-        new cloudwatchActions.SnsAction(snsTopicAlerts)
+        new cloudwatchActions.SnsAction(snsTopicAlerts),
       );
       alarm.addOkAction(new cloudwatchActions.SnsAction(snsTopicAlerts));
     });
@@ -285,11 +300,11 @@ export class CommentsStack extends Stack {
 
     api.root.addMethod(
       "GET",
-      new apigateway.LambdaIntegration(lambdaCommentsGet)
+      new apigateway.LambdaIntegration(lambdaCommentsGet),
     );
     api.root.addMethod(
       "POST",
-      new apigateway.LambdaIntegration(lambdaCommentsPost)
+      new apigateway.LambdaIntegration(lambdaCommentsPost),
     );
     api.root
       .addResource("delete")
@@ -298,7 +313,7 @@ export class CommentsStack extends Stack {
       .addResource("publish")
       .addMethod(
         "GET",
-        new apigateway.LambdaIntegration(lambdaCommentsPublish)
+        new apigateway.LambdaIntegration(lambdaCommentsPublish),
       );
 
     lambdaCommentsPost.addToRolePolicy(
@@ -306,7 +321,7 @@ export class CommentsStack extends Stack {
         actions: ["ses:SendEmail"],
         resources: ["*"],
         effect: iam.Effect.ALLOW,
-      })
+      }),
     );
   }
 }
