@@ -80,7 +80,11 @@ const handler: APIGatewayProxyHandler = async (event) => {
       name,
       website,
       github: normalizeUsername(github, "https://github.com"),
-      comment: sanitizeHtml(marked(comment)),
+      comment: sanitizeHtml(
+        marked(comment, {
+          async: false,
+        }),
+      ),
       parent,
       slug,
       title,
